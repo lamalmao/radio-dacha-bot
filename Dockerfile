@@ -5,7 +5,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 WORKDIR /usr/src/bot
 
-RUN apk add ffmpeg
+RUN apt-get intsall ffmpeg
 
 COPY package*.json ./
 RUN yarn install
