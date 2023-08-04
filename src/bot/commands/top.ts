@@ -8,9 +8,6 @@ import {
 } from 'discord.js';
 import Command from './command';
 import client from '../../db';
-import { config } from 'dotenv';
-
-config();
 
 export class Top implements Command {
   async execute(message: Message) {
@@ -27,7 +24,7 @@ export class Top implements Command {
         take: 5
       });
 
-      const fullStatsLink = `http://${process.env['host']}/stats`;
+      const fullStatsLink = `http://${process.env['HOST']}/stats`;
 
       let msg = underscore('Топ 5 видео по популярности:\n\n') as string;
       tracks.forEach((track, index) => {
