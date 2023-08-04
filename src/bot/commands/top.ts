@@ -8,6 +8,9 @@ import {
 } from 'discord.js';
 import Command from './command';
 import client from '../../db';
+import { config } from 'dotenv';
+
+config();
 
 export class Top implements Command {
   async execute(message: Message) {
