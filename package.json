@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "dev": "npx ts-node-esm src/app.ts",
-    "generate": "yarn prisma generate && yarn prisma migrate deploy --name current",
+    "generate": "yarn prisma generate && yarn prisma migrate deploy",
     "build": "yarn tsc",
     "start": "node ./dist/app.js"
   },
