@@ -1,9 +1,8 @@
 import { Message } from 'discord.js';
 import Command from './command';
 import { channels } from '..';
-import { AudioPlayerStatus } from '@discordjs/voice';
 
-export class StopMusic implements Command {
+export class Clear implements Command {
   async execute(message: Message) {
     try {
       const channelData = channels.get(message.guildId ? message.guildId : '');
@@ -11,12 +10,12 @@ export class StopMusic implements Command {
         return;
       }
 
-      if (channelData.player.state.status === AudioPlayerStatus.Playing) {
-        channelData.player.pause(true);
-        if (channelData.timer) {
-          clearTimeout(channelData.timer);
-        }
+      if (channelData.timer) {
+        clearTimeout(channelData.timer);
       }
+
+      channelData.queue = [];
+      await message.reply('Очередь очищена');
     } catch (error) {
       message.reply((error as Error).message);
     }

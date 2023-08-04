@@ -21,7 +21,8 @@ export class TracksList implements Command {
         const residue = seconds - 60 * minutes;
 
         text = text.concat(
-          `${index + 1}. ${bold(item.title)}: ${minutes}:${residue};\n`
+          // prettier-ignore
+          `${index + 1}. ${bold(item.title)}: ${minutes}:${residue.toString().padStart(2, '0')};\n`
         );
       });
 

@@ -68,7 +68,11 @@ const initPlayer = (message: Message) => {
         highWaterMark: 1 << 25
       });
 
-      bot.user?.setActivity(`🎶 ${track.title}`, {
+      stream.on('error', err => {
+        console.log(err.message);
+      });
+
+      message.client.user.setActivity(`🎶 ${track.title}`, {
         type: ActivityType.Listening
       });
 
@@ -110,7 +114,7 @@ const initPlayer = (message: Message) => {
 
 export const channels = new Map<string, ChannelData>();
 
-const prefix = '#';
+const prefix = '!';
 const bot = new Client({
   intents: [
     GatewayIntentBits.GuildMembers,
@@ -135,12 +139,12 @@ bot.on(Events.MessageCreate, async message => {
 
     const commandData = parseCommand(message.content, prefix);
     if (commandData === null) {
-      throw new Error('#help - список доступных команд');
+      throw new Error('!help - список доступных команд');
     }
 
     const command = commands.get(commandData.command);
     if (!command) {
-      throw new Error('#help - список доступных команд');
+      throw new Error('!help - список доступных команд');
     }
 
     initPlayer(message);

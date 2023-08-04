@@ -1,13 +1,11 @@
 import { Message } from 'discord.js';
-import { VoiceConnectionStatus, joinVoiceChannel } from '@discordjs/voice';
+import { joinVoiceChannel } from '@discordjs/voice';
 import Command, { CommandData } from './command';
-import ytdl from 'ytdl-core';
 import client from '../../db';
 import { channels } from '..';
 import { getVideo, getVideoDataWithDuration } from '../../search';
 
 const processYTVideo = async (link: string) => {
-  const id = ytdl.getURLVideoID(link);
   const data = await getVideoDataWithDuration(link);
 
   if (!data) {
@@ -16,7 +14,7 @@ const processYTVideo = async (link: string) => {
 
   await client.video.upsert({
     where: {
-      id
+      id: data.id
     },
     update: {
       plays: {
@@ -24,7 +22,7 @@ const processYTVideo = async (link: string) => {
       }
     },
     create: {
-      id,
+      id: data.id,
       description: data.description,
       title: data.title,
       duration: data.duration
@@ -78,14 +76,7 @@ export class PlayStream implements Command {
         adapterCreator: message.guild.voiceAdapterCreator
       });
 
-      connection.on('stateChange', state => {
-        if (
-          state.status === VoiceConnectionStatus.Destroyed ||
-          state.status === VoiceConnectionStatus.Disconnected
-        ) {
-          channelData.player.emit('next');
-        }
-      });
+      channelData.paused = false;
 
       connection.subscribe(channelData.player);
       channelData.player.emit('next');
