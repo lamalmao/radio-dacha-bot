@@ -45,7 +45,7 @@ function createYTStream(data: ChannelData, player: AudioPlayer) {
     filter: 'audioonly',
     quality: 'highestaudio',
     highWaterMark: 1 << 25,
-    begin: data.playing.duration
+    begin: data.continueFrom ? data.continueFrom + 's' : undefined
   });
 
   stream.on('error', err => {
