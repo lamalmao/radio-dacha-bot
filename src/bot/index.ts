@@ -239,11 +239,7 @@ bot.on(Events.MessageCreate, async message => {
 });
 
 const parseCommand = (message: string, prefix: string = '!') => {
-  const reg = new RegExp(
-    `^\\${prefix}(\\w+)(\\s{1,}([^\\s]{0,}))(\\s{1,}(\\!?))?$`,
-    'i'
-  );
-  console.log(reg);
+  const reg = new RegExp(`^\\${prefix}(\\w+)(\\s(.{0,}))?$`, 'i');
   const data = reg.exec(message);
 
   if (!data) {
@@ -252,15 +248,12 @@ const parseCommand = (message: string, prefix: string = '!') => {
 
   let content: string | undefined;
   if (data.length > 2) {
-    content = data[3];
+    content = data[2];
   }
-
-  const playlist = data[5] === '!';
 
   return {
     command: data[1],
-    content,
-    playlist
+    content
   };
 };
 
