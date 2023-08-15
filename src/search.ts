@@ -110,8 +110,10 @@ export const getVideo: (
     let videoUrl: string;
 
     if (url) {
-      if (ytdl.validateURL(url.href)) {
-        videoUrl = url.href;
+      const videoId = url.searchParams.get('v');
+
+      if (!videoId) {
+        videoUrl = `https://youtube.com/watch?v=${videoId}`;
       } else {
         throw new Error(
           'На данный момент поддерживаются только YouTube ссылки.'

@@ -28,7 +28,43 @@ export type ChannelData = {
   paused: boolean;
   player: AudioPlayer;
   timer?: NodeJS.Timer;
+  started?: Date;
+  continueFrom?: number;
+  playing?: {
+    url: string;
+    duration: number;
+  };
 };
+
+function createYTStream(data: ChannelData, player: AudioPlayer) {
+  if (!data.playing) {
+    return null;
+  }
+
+  const stream = ytdl(data.playing.url, {
+    filter: 'audioonly',
+    quality: 'highestaudio',
+    highWaterMark: 1 << 25,
+    begin: data.playing.duration
+  });
+
+  stream.on('error', err => {
+    console.log(err.message);
+
+    if (data.started && data.playing) {
+      const elapsed = Math.ceil(
+        (Date.now() - (data.started ? data.started.getTime() : 0)) / 1000
+      );
+
+      data.continueFrom = data.playing.duration - elapsed;
+    }
+
+    player.emit('next');
+  });
+
+  const resource = createAudioResource(stream);
+  return resource;
+}
 
 const initPlayer = (message: Message) => {
   const guildId = message.guildId ? message.guildId : '';
@@ -53,14 +89,31 @@ const initPlayer = (message: Message) => {
         return;
       }
 
+      if (data.continueFrom) {
+        const stream = createYTStream(data, player);
+        if (stream) {
+          player.play(stream);
+        }
+
+        data.continueFrom = undefined;
+        return;
+      }
+
       if (data.timer) {
         clearTimeout(data.timer);
       }
+
+      data.started = new Date();
 
       const track = data.queue.shift();
       if (!track) {
         return;
       }
+
+      data.playing = {
+        duration: Math.ceil(track.duration / 1000),
+        url: track.url
+      };
 
       const stream = ytdl(track.url, {
         filter: 'audioonly',
@@ -70,6 +123,16 @@ const initPlayer = (message: Message) => {
 
       stream.on('error', err => {
         console.log(err.message);
+
+        if (data.started && data.playing) {
+          const elapsed = Math.ceil(
+            (Date.now() - (data.started ? data.started.getTime() : 0)) / 1000
+          );
+
+          data.continueFrom = data.playing.duration - elapsed;
+        }
+
+        player.emit('next');
       });
 
       message.client.user.setActivity(`🎶 ${track.title}`, {
@@ -176,7 +239,11 @@ bot.on(Events.MessageCreate, async message => {
 });
 
 const parseCommand = (message: string, prefix: string = '!') => {
-  const reg = new RegExp(`^\\${prefix}(\\w+)(\\s(.{0,}))?$`, 'i');
+  const reg = new RegExp(
+    `^\\${prefix}(\\w+)(\\s{1,}([^\\s]{0,}))(\\s{1,}(\\!?))?$`,
+    'i'
+  );
+  console.log(reg);
   const data = reg.exec(message);
 
   if (!data) {
@@ -185,12 +252,15 @@ const parseCommand = (message: string, prefix: string = '!') => {
 
   let content: string | undefined;
   if (data.length > 2) {
-    content = data[2];
+    content = data[3];
   }
+
+  const playlist = data[5] === '!';
 
   return {
     command: data[1],
-    content
+    content,
+    playlist
   };
 };
 
