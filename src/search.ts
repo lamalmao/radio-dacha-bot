@@ -112,8 +112,8 @@ export const getVideo: (
     if (url) {
       const videoId = url.searchParams.get('v');
 
-      if (!videoId) {
-        videoUrl = `https://youtube.com/watch?v=${videoId}`;
+      if (videoId) {
+        videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
       } else {
         throw new Error(
           'На данный момент поддерживаются только YouTube ссылки.'
