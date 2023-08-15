@@ -9,6 +9,7 @@ RUN apt-get update
 RUN apt-get -y install ffmpeg
 
 COPY package*.json ./
+COPY yarn.lock ./
 RUN yarn install
 COPY . .
 RUN yarn run generate
